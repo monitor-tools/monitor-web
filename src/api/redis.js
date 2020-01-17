@@ -92,3 +92,35 @@ export function queryRedisMemoryRecordAround(id,start,end) {
   })
 }
 
+export function queryRedisClientRecord(id,lastMemoryId) {
+  let url = '/redis/'+id+'/client/record';
+  if(lastMemoryId !== undefined && lastMemoryId !== null && lastMemoryId > 0 && lastMemoryId !== ''){
+    url = url + "?lastMemoryId="+Number.parseInt(lastMemoryId);
+  }
+  return request({
+    url: url,
+    method: 'get'
+  })
+}
+
+export function queryRedisClientRecordAround(id,start,end) {
+  return request({
+    url: '/redis/'+id+'/client/record/timeAround',
+    method: 'get',
+    params:{
+      start:start,
+      end:end
+    }
+  })
+}
+
+export function queryRedisKeysPattern(id,pattern) {
+  return request({
+    url: '/redis/'+id+'/keys',
+    method: 'get',
+    params:{
+      pattern:pattern
+    }
+  })
+}
+

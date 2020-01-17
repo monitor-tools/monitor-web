@@ -15,7 +15,7 @@ function resolve(dir) {
 }
 
 module.exports = {
-  publicPath: process.env.NODE_ENV === 'production'? '/production-sub-path/': '/',
+  publicPath: process.env.NODE_ENV === 'production'? '/vuejs/': '/',
   devServer: {
     publicPath: '/',
     host: '0.0.0.0',

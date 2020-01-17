@@ -169,7 +169,7 @@
     color: green;
   }
 
-  .number {
+  .darkorange {
     color: darkorange;
   }
 

@@ -2,7 +2,7 @@
   <div>
     <el-row>
       <el-col :span="24">
-        <el-button type="primary" icon="el-icon-search" @click="dialogFormVisible = true">添加</el-button>
+        <el-button type="primary" @click="dialogFormVisible = true">添加</el-button>
       </el-col>
     </el-row>
     <el-row>
@@ -113,8 +113,12 @@
     },
     methods: {
       connectedCellClassName({row, column}){
-        if (column.property === 'connectedStr' && row.connected === 0) {
-          return 'off-line-cell'
+        if (column.property === 'connectedStr') {
+          if(row.connected === 0){
+            return 'off-line-cell'
+          } else {
+            return 'on-line-cell'
+          }
         }
         return '';
       },
@@ -154,6 +158,10 @@
 
   .el-table .off-line-cell {
     color: red;
+  }
+
+  .el-table .on-line-cell {
+    color: green;
   }
 </style>
 <style scoped>

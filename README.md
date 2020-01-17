@@ -1,4 +1,4 @@
-# redis-manager
+# monitor-web-manager
 
 ## Project setup
 ```

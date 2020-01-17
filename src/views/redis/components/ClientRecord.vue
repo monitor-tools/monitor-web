@@ -3,7 +3,7 @@
     <el-row>
       <el-col :span="24">
         <div style="width: 100%; text-align: center">
-          <h2>内存概览</h2>
+          <h2>客户端数量</h2>
         </div>
       </el-col>
     </el-row>
@@ -35,10 +35,10 @@
     </el-row>
 
   </div>
-
 </template>
 
 <script>
+
   let echarts = require('echarts/lib/echarts');//引入echarts
   require('echarts/lib/chart/line'); //引入折线图
   // 引入提示框和标题组件
@@ -46,11 +46,11 @@
   require('echarts/lib/component/title');
   require('echarts/lib/component/legend');
 
-  import {queryRedisMemoryRecord, queryRedisMemoryRecordAround} from '@/api/redis'
+  import {queryRedisClientRecord, queryRedisClientRecordAround} from '@/api/redis'
   import {dateFormat} from '@/utils/dateFormat'
 
   export default {
-    name: "MemoryRecord",
+    name: "ClientRecord",
     props: {
       id: {
         type: String,
@@ -58,15 +58,10 @@
       }
     },
     data() {
-      return {
-        lastMemoryId: '',
-        mychart: {},
+      return{
+        lastMemoryId:'',
         time: [],
-        memory: [],
-        memoryRss: [],
-        memoryPeek: [],
-        memoryOverhead: [],
-        totalSystemMemory: [],
+        clients: [],
         timeAround: [new Date(), new Date()],
         pickerOptions: {
           disabledDate(date) {
@@ -91,29 +86,20 @@
       },
       refreshEcharts() {
         const that = this
-        queryRedisMemoryRecord(this.id, this.lastMemoryId).then(function (result) {
+        queryRedisClientRecord(this.id, this.lastMemoryId).then(function (result) {
           if(result.data == null){
             return
           }
           if (result.data.lastMemoryId === null) {
-            return;
+            return
           }
 
           if (result.data.time.length > 0) {
             for (let i = 0; i < result.data.time.length; i++) {
               that.time.splice(i, 1)
-              that.memory.splice(i, 1)
-              that.memoryRss.splice(i, 1)
-              that.memoryPeek.splice(i, 1)
-              that.memoryOverhead.splice(i, 1)
-              that.totalSystemMemory.splice(i, 1)
-
+              that.clients.splice(i, 1)
               that.time.push(result.data.time[i])
-              that.memory.push(result.data.memoryKB[i])
-              that.memoryRss.push(result.data.memoryRss[i])
-              that.memoryPeek.push(result.data.memoryPeek[i])
-              that.memoryOverhead.push(result.data.memoryOverhead[i])
-              that.totalSystemMemory.push(result.data.totalSystemMemory[i])
+              that.clients.push(result.data.clients[i])
             }
           }
 
@@ -124,7 +110,7 @@
               trigger: 'axis'
             },
             legend: {
-              data: ['memory','memory_rss','memory_peek','memory_overhead','total_system_memory']
+              data: ['client']
             },
             xAxis: {
               type: 'category',
@@ -136,28 +122,8 @@
             },
             series: [
               {
-                name: 'memory',
-                data: that.memory,
-                type: 'line'
-              },
-              {
-                data: that.memoryRss,
-                name: 'memory_rss',
-                type: 'line'
-              },
-              {
-                data: that.memoryPeek,
-                name: 'memory_peek',
-                type: 'line'
-              },
-              {
-                data: that.memoryOverhead,
-                name: 'memory_overhead',
-                type: 'line'
-              },
-              {
-                data: that.totalSystemMemory,
-                name: 'total_system_memory',
+                name: 'count',
+                data: that.clients,
                 type: 'line'
               }
             ]
@@ -175,18 +141,17 @@
       search() {
         const that = this
         that.time.splice(0, that.time.length)
-        that.memory.splice(0, that.memory.length)
-        that.memoryRss.splice(0, that.memoryRss.length)
-        that.memoryPeek.splice(0, that.memoryPeek.length)
-        that.memoryOverhead.splice(0, that.memoryOverhead.length)
-        that.totalSystemMemory.splice(0, that.totalSystemMemory.length)
+        that.clients.splice(0, that.clients.length)
         that.lastMemoryId = ''
+
         clearInterval(this.intervalId)
-        queryRedisMemoryRecordAround(that.id, dateFormat('yyyyMMddhhmmss', that.timeAround[0]), dateFormat('yyyyMMddhhmmss', that.timeAround[1]))
+        queryRedisClientRecordAround(that.id, dateFormat('yyyyMMddhhmmss', that.timeAround[0]), dateFormat('yyyyMMddhhmmss', that.timeAround[1]))
           .then(function (result) {
+
             if(result.data == null){
               return
             }
+
             const option = {
               xAxis: {
                 type: 'category',
@@ -198,28 +163,8 @@
               },
               series: [
                 {
-                  data: result.data.memoryKB,
-                  name: 'memory',
-                  type: 'line'
-                },
-                {
-                  data: result.data.memoryRss,
-                  name: 'memory_rss',
-                  type: 'line'
-                },
-                {
-                  data: result.data.memoryPeek,
-                  name: 'memory_peek',
-                  type: 'line'
-                },
-                {
-                  data: result.data.memoryOverhead,
-                  name: 'memory_overhead',
-                  type: 'line'
-                },
-                {
-                  data: result.data.totalSystemMemory,
-                  name: 'total_system_memory',
+                  data: result.data.clients,
+                  name: 'count',
                   type: 'line'
                 }
               ]
