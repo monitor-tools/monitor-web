@@ -70,7 +70,7 @@
 </template>
 
 <script>
-  import {queryRedisKeysPattern} from '@/api/redis'
+  import {queryRedisKeysPattern,queryRedisServerInfo} from '@/api/redis'
 
   export default {
     name: "Keys",
@@ -82,6 +82,7 @@
     },
     data() {
       return {
+        redisMode:'',
         currentPage: 1,
         pageSize: 100,
         total: 0,
@@ -91,7 +92,19 @@
       }
     },
     mounted() {
-      this.queryRedisKeys()
+      const that = this
+      queryRedisServerInfo(this.id).then(function (result) {
+        that.redisMode = result.data.redis_mode
+
+        if(that.redisMode === 'sentinel') {
+          return;
+        }
+        that.queryRedisKeys()
+      })
+
+
+    },
+    created(){
     },
     methods: {
       queryRedisKeys() {
@@ -113,7 +126,7 @@
       handleCurrentChange(val) {
         const that = this
         that.currentPage = val
-        const startIndex = Math.pow(that.pageSize, that.currentPage - 1);
+        const startIndex = Math.pow(that.pageSize, that.currentPage - 1)-1;
         let endIndex = 0
         if(that.total > that.pageSize){
           endIndex = startIndex + that.pageSize

@@ -7,6 +7,14 @@ export function queryRedisInfo() {
   })
 }
 
+export function doSaveRedisInfo(data) {
+  return request({
+    url: '/redis/add',
+    method: 'post',
+    data:data
+  })
+}
+
 export function queryRedisServerInfo(id) {
   return request({
     url: '/redis/'+id+'/server/info',
@@ -117,6 +125,16 @@ export function queryRedisClientRecordAround(id,start,end) {
 export function queryRedisKeysPattern(id,pattern) {
   return request({
     url: '/redis/'+id+'/keys',
+    method: 'get',
+    params:{
+      pattern:pattern
+    }
+  })
+}
+
+export function queryRedisSentinel(id,pattern) {
+  return request({
+    url: '/redis/'+id+'/sentinel/info',
     method: 'get',
     params:{
       pattern:pattern

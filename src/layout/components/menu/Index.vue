@@ -14,6 +14,7 @@
         <el-menu-item index="/redis/list">列表</el-menu-item>
       </el-submenu>
       <el-menu-item index="3" >消息中心</el-menu-item>
+      <el-menu-item index="/logout" style="float: right" >注销</el-menu-item>
     </el-menu>
   </div>
 </template>

@@ -46,7 +46,7 @@
   require('echarts/lib/component/title');
   require('echarts/lib/component/legend');
 
-  import {queryRedisMemoryRecord, queryRedisMemoryRecordAround} from '@/api/redis'
+  import {queryRedisMemoryRecord, queryRedisMemoryRecordAround, queryRedisServerInfo} from '@/api/redis'
   import {dateFormat} from '@/utils/dateFormat'
 
   export default {
@@ -59,6 +59,7 @@
     },
     data() {
       return {
+        redisMode:'',
         lastMemoryId: '',
         mychart: {},
         time: [],
@@ -76,12 +77,21 @@
       }
     },
     mounted() {
-      this.initEcharts()
-      this.refreshEcharts()
-      // 执行异步任务
-      this.intervalId = setInterval(() => {
-        this.refreshEcharts()
-      }, 1000 * 30)
+
+      const that = this
+      queryRedisServerInfo(this.id).then(function (result) {
+        that.redisMode = result.data.redis_mode
+
+        if(that.redisMode === 'sentinel') {
+          return;
+        }
+        that.initEcharts()
+        that.refreshEcharts()
+        // 执行异步任务
+        that.intervalId = setInterval(() => {
+          that.refreshEcharts()
+        }, 1000 * 30)
+      })
     },
     methods: {
       initEcharts() {

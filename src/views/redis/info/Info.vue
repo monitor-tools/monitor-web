@@ -13,12 +13,13 @@
     <div>
       <el-link @click="serverDrawer = true">Server</el-link>
       <el-link @click="clientDrawer = true" type="primary">Client</el-link>
-      <el-link @click="memoryDrawer = true" type="success">Memory</el-link>
-      <el-link @click="persistenceDrawer = true" type="warning">persistence</el-link>
-      <el-link @click="statsDrawer = true" type="danger">stats</el-link>
-      <el-link @click="replicationDrawer = true" type="info">replication</el-link>
-      <el-link @click="cpuDrawer = true" type="success">cpu</el-link>
-      <el-link @click="keySpaceDrawer = true" type="primary">keySpace</el-link>
+      <el-link v-if="redisMode !== 'sentinel'" @click="memoryDrawer = true" type="success">Memory</el-link>
+      <el-link v-if="redisMode !== 'sentinel'" @click="persistenceDrawer = true" type="warning">Persistence</el-link>
+      <el-link @click="statsDrawer = true" type="danger">Stats</el-link>
+      <el-link v-if="redisMode !== 'sentinel'" @click="replicationDrawer = true" type="info">Replication</el-link>
+      <el-link @click="cpuDrawer = true" type="success">CPU</el-link>
+      <el-link v-if="redisMode !== 'sentinel'" @click="keySpaceDrawer = true" type="primary">KeySpace</el-link>
+      <el-link v-if="redisMode === 'sentinel'" @click="sentinelDrawer = true" type="primary">Sentinel</el-link>
     </div>
 
     <el-drawer
@@ -85,9 +86,17 @@
       <keySpace :id="id"/>
     </el-drawer>
 
+    <el-drawer
+      title="详情"
+      :with-header="false"
+      :visible.sync="sentinelDrawer"
+      :direction="sentinelDirection">
+      <sentinel :id="id"/>
+    </el-drawer>
+
     <el-row>
       <el-col :span="24">
-         <echarts :id="id"/>
+         <echarts :id="id" :redisMode="redisMode"/>
       </el-col>
     </el-row>
 
@@ -105,7 +114,10 @@
   import Replication from '@/views/redis/components/Replication'
   import CPU from '@/views/redis/components/CPU'
   import KeySpace from '@/views/redis/components/KeySpace'
+  import Sentinel from '@/views/redis/components/Sentinel'
   import Echarts from '@/views/redis/echarts/Echarts'
+
+  import {queryRedisServerInfo} from '@/api/redis'
 
   export default {
     name: "Info",
@@ -118,7 +130,8 @@
       Replication,
       CPU,
       KeySpace,
-      Echarts
+      Echarts,
+      Sentinel
     },
     props: {
       id: {
@@ -128,6 +141,7 @@
     },
     data() {
       return {
+        redisMode:'',
         serverDrawer: false,
         serverDirection: 'rtl',
         clientDrawer: false,
@@ -144,9 +158,15 @@
         cpuDirection: 'rtl',
         keySpaceDrawer: false,
         keySpaceDirection: 'rtl',
+        sentinelDrawer: false,
+        sentinelDirection: 'rtl'
       }
     },
     mounted() {
+      const that = this
+      queryRedisServerInfo(this.id).then(function (result) {
+        that.redisMode = result.data.redis_mode
+      })
     },
     methods:{
 

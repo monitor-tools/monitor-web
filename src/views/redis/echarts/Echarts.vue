@@ -4,7 +4,7 @@
       <div style="height: 10px; width: 100%;"></div>
     </el-row>
     <el-row>
-      <el-col :span="12">
+      <el-col v-if="redisMode !== 'sentinel'" :span="12">
         <memoryRecord :id="id" style="height: 500px;width: 100%"/>
       </el-col>
       <el-col :span="12">
@@ -13,7 +13,7 @@
     </el-row>
 
     <el-row>
-      <el-col :span="12">
+      <el-col v-cloak v-if="redisMode !== 'sentinel'" :span="12">
         <keys :id="id"/>
       </el-col>
     </el-row>
@@ -35,6 +35,10 @@
     },
     props: {
       id: {
+        type: String,
+        default: ''
+      },
+      redisMode:{
         type: String,
         default: ''
       }

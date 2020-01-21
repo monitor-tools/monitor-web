@@ -36,6 +36,7 @@
             label="port">
           </el-table-column>
           <el-table-column
+            v-if="false"
             prop="connected"
             label="connected">
           </el-table-column>
@@ -59,6 +60,9 @@
 
     <el-dialog title="添加Redis" :visible.sync="dialogFormVisible" width="25%">
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="name" prop="name">
+          <el-input v-model="form.name"></el-input>
+        </el-form-item>
         <el-form-item label="host" prop="host">
           <el-input v-model="form.host" placeholder="127.0.0.1"></el-input>
         </el-form-item>
@@ -80,7 +84,7 @@
 
 <script>
 
-  import { queryRedisInfo } from '@/api/redis'
+  import {queryRedisInfo, doSaveRedisInfo} from '@/api/redis'
 
   export default {
     name: "List",
@@ -89,11 +93,15 @@
         dialogFormVisible: false,
         tableData: [],
         form: {
+          name: '',
           host: '',
           port: '',
           password: ''
         },
         rules: {
+          name: [
+            {required: true, message: '请输入名称', trigger: 'blur'},
+          ],
           host: [
             {required: true, message: '请输入host', trigger: 'blur'},
           ],
@@ -105,16 +113,16 @@
     },
     mounted() {
       const that = this
-      queryRedisInfo().then(function (result){
+      queryRedisInfo().then(function (result) {
         for (let i = 0; i < result.data.length; i++) {
           that.tableData.push(result.data[i]);
         }
       })
     },
     methods: {
-      connectedCellClassName({row, column}){
+      connectedCellClassName({row, column}) {
         if (column.property === 'connectedStr') {
-          if(row.connected === 0){
+          if (row.connected === 0) {
             return 'off-line-cell'
           } else {
             return 'on-line-cell'
@@ -129,9 +137,29 @@
         return '';
       },
       submitForm(formName) {
+        const that = this
         this.$refs[formName].validate((valid) => {
-          if (valid){
-            alert('ok submit!!');
+          if (valid) {
+
+            // eslint-disable-next-line no-console
+            console.log(that.form)
+            doSaveRedisInfo(that.form).then(function (result) {
+              if (result.code === 200) {
+                that.dialogFormVisible = false
+                that.name = ''
+                that.host = ''
+                that.port = ''
+                that.password = ''
+              }
+            }).then(function (result) {
+              if (result.code != 200) {
+                alert(result.msg)
+              }
+            }).catch(e => {
+              // eslint-disable-next-line no-console
+              console.log(e)
+            })
+
           } else {
             alert('error submit!!');
             return false;
@@ -142,7 +170,7 @@
         this.$refs[formName].resetFields();
       },
       handleClick(row) {
-        this.$router.push('/redis/infos/'+row.id);
+        this.$router.push('/redis/infos/' + row.id);
       }
     },
   }
